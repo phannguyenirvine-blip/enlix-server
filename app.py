@@ -48,7 +48,21 @@ def home():
 def webhook():
     if request.method == "GET":
         return request.args.get("verify_token", "OK"), 200
-    data = request.get_json(silent=True)
+
+    # --- In ra toàn bộ dữ liệu Zalo gửi ---
+    print("\n🧾 RAW WEBHOOK PAYLOAD:")
+    print(request.data.decode("utf-8"))  # In nguyên văn nội dung body
+
+    # --- Thử parse JSON nếu có ---
+    try:
+        data = request.get_json(force=True)
+        print("\n✅ PARSED JSON:")
+        print(json.dumps(data, indent=2, ensure_ascii=False))
+    except Exception as e:
+        print(f"❌ Không parse được JSON: {e}")
+        data = {}
+
+    # --- Gọi hàm xử lý ---
     threading.Thread(target=process_webhook, args=(data,)).start()
     return {"status": "ok"}, 200
 
