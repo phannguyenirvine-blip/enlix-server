@@ -1,6 +1,14 @@
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
+import os
 
 app = Flask(__name__)
+
+# Cho phép truy cập file HTML xác minh
+@app.route("/<path:filename>")
+def serve_static(filename):
+    if os.path.exists(filename):
+        return send_from_directory('.', filename)
+    return "File not found", 404
 
 @app.route("/")
 def home():
@@ -8,14 +16,10 @@ def home():
 
 @app.route("/webhook/zalo", methods=["GET", "POST"])
 def webhook():
-    # Khi Zalo kiểm tra xác thực
     if request.method == "GET":
         verify_token = request.args.get("verify_token")
-        print("🔍 Zalo đang xác thực domain:", verify_token)
-        # Trả lại đúng verify_token để xác thực thành công
+        print("🔍 Xác thực domain từ Zalo:", verify_token)
         return verify_token, 200
-
-    # Khi có tin nhắn gửi đến
     elif request.method == "POST":
         data = request.json
         print("📩 Nhận được tin nhắn từ Zalo:", data)
