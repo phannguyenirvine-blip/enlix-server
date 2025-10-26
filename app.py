@@ -6,18 +6,20 @@ app = Flask(__name__)
 def home():
     return "🟢 Enlix Server (Render) is running!"
 
-# ✅ Webhook có xác thực domain + nhận dữ liệu tin nhắn
 @app.route("/webhook/zalo", methods=["GET", "POST"])
 def webhook():
+    # Khi Zalo kiểm tra xác thực
     if request.method == "GET":
-        # Zalo gửi verify_token để kiểm tra
-        token = request.args.get("verify_token")
-        print(f"🔍 Xác thực domain từ Zalo: {token}")
-        return token  # Zalo cần server trả lại y hệt token này
+        verify_token = request.args.get("verify_token")
+        print("🔍 Zalo đang xác thực domain:", verify_token)
+        # Trả lại đúng verify_token để xác thực thành công
+        return verify_token, 200
+
+    # Khi có tin nhắn gửi đến
     elif request.method == "POST":
         data = request.json
         print("📩 Nhận được tin nhắn từ Zalo:", data)
-        return {"ok": True}
+        return {"ok": True}, 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
